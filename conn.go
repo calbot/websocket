@@ -996,10 +996,10 @@ func (c *Conn) NextReader() (messageType int, r io.Reader, err error) {
 	// Applications that do handle the error returned from this method spin in
 	// tight loop on connection failure. To help application developers detect
 	// this error, panic on repeated reads to the failed connection.
-	c.readErrCount++
-	if c.readErrCount >= 1000 {
-		panic("repeated read on failed websocket connection")
-	}
+// 	c.readErrCount++
+// 	if c.readErrCount >= 1000 {
+// 		panic("repeated read on failed websocket connection")
+// 	}
 
 	return noFrame, nil, c.readErr
 }
