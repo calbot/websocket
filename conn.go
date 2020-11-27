@@ -976,7 +976,8 @@ func (c *Conn) NextReader() (messageType int, r io.Reader, err error) {
 	c.messageReader = nil
 	c.readLength = 0
 
-	if e, ok := c.readErr.(*netError); ok && e.Temporary() {
+	e, ok := c.readErr.(*netError)
+	if ok && e.Temporary() || e.Temporary() {
 		//Reset temporary errors
 		c.readErr = nil
 	}
@@ -1016,8 +1017,9 @@ func (r *messageReader) Read(b []byte) (int, error) {
 	if c.messageReader != r {
 		return 0, io.EOF
 	}
-	
-	if e, ok := c.readErr.(*netError); ok && e.Temporary() {
+
+	e, ok := c.readErr.(*netError)
+	if ok && e.Temporary() || e.Temporary() {
 		//Reset temporary errors
 		c.readErr = nil
 	}
