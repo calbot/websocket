@@ -976,6 +976,11 @@ func (c *Conn) NextReader() (messageType int, r io.Reader, err error) {
 	c.messageReader = nil
 	c.readLength = 0
 
+	if e, ok := c.readErr.(*netError); ok && e.Temporary() {
+		//Reset temporary errors
+		c.readErr = nil
+	}
+
 	for c.readErr == nil {
 		frameType, err := c.advanceFrame()
 		if err != nil {
@@ -996,10 +1001,10 @@ func (c *Conn) NextReader() (messageType int, r io.Reader, err error) {
 	// Applications that do handle the error returned from this method spin in
 	// tight loop on connection failure. To help application developers detect
 	// this error, panic on repeated reads to the failed connection.
-// 	c.readErrCount++
-// 	if c.readErrCount >= 1000 {
-// 		panic("repeated read on failed websocket connection")
-// 	}
+	// 	c.readErrCount++
+	// 	if c.readErrCount >= 1000 {
+	// 		panic("repeated read on failed websocket connection")
+	// 	}
 
 	return noFrame, nil, c.readErr
 }
@@ -1010,6 +1015,11 @@ func (r *messageReader) Read(b []byte) (int, error) {
 	c := r.c
 	if c.messageReader != r {
 		return 0, io.EOF
+	}
+	
+	if e, ok := c.readErr.(*netError); ok && e.Temporary() {
+		//Reset temporary errors
+		c.readErr = nil
 	}
 
 	for c.readErr == nil {
